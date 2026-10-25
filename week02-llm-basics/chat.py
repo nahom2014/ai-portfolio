@@ -40,12 +40,18 @@ def main() -> None:
 
         messages.append({"role": "user", "content": user_input})
 
-        response = client.messages.create(
+        # NEW: stream the answer instead of waiting for all of it
+        print("Claude: ", end="", flush=True)
+        with client.messages.stream(
             model=MODEL,
             max_tokens=1024,          # ceiling for thinking + answer together
             system=SYSTEM_PROMPT,
             messages=messages,        # the WHOLE history
-        )
+        ) as stream:
+            for text in stream.text_stream:
+                print(text, end="", flush=True)
+            response = stream.get_final_message()
+        print()                       # new line after the streamed answer
 
         # count the cost first: you pay even when the answer is empty
         turn += 1
@@ -63,8 +69,7 @@ def main() -> None:
             print("[ERROR] no answer received, please ask again")
             messages.pop()            # remove the unanswered question, keep history valid
         else:
-            print(f"Claude: {reply}")
-            messages.append({"role": "assistant", "content": reply})
+            messages.append({"role": "assistant", "content": reply})   # already printed above
 
         print(f"[turn {turn}] {inp} in / {out} out (thinking {thinking}) | ¥{yen:.4f} | total ¥{total_yen:.4f}")
 
