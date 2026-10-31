@@ -55,7 +55,7 @@ class InquiryResult(BaseModel):
     suggested_reply: str
     intent: Literal["booking", "change", "cancel", "question", "complaint", "other"]
     urgency: Literal["low", "medium", "high"]
-    summary_ja: str = Field(max_length=100)
+    summary_ja: str = Field(max_length=20)
 
 
 
